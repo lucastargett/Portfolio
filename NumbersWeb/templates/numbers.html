@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numbers</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Numbers</h1>
+    <form id="mathForm">
+        <label for="mathOptions">Choose which maths you want to explore:</label>
+        <select id="mathOptions" name="mathOptions" onchange="showOption()">
+            <option value="">Select an option</option>
+            <option value="pi">Find Pi to the Nth digit</option>
+            <option value="e">Find e to the Nth digit</option>
+            <option value="fibonacci">Find Fibonacci Sequence to the Nth digit</option>
+            <option value="factorisation">Factorisation</option>
+            <option value="prime">Prime Number Finder</option>
+            <option value="tileCost">Cost of Tile to Cover Floor</option>
+            <option value="mortgage">Monthly mortgage payments</option>
+            <option value="changeReturn">Change return program</option>
+            <option value="binaryConverter">Binary to Decimal and Back Converter</option>
+            <option value="calculator">Calculator</option>
+        </select>
+    </form>
+
+    <div id="optionContainer" class="hidden">
+        <h2 id="optionTitle"></h2>
+        <div id="optionContent"></div>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        function showOption() {
+            const selectedOption = document.getElementById('mathOptions').value;
+            const optionContainer = document.getElementById('optionContainer');
+            const optionTitle = document.getElementById('optionTitle');
+            const optionContent = document.getElementById('optionContent');
+            const result = document.getElementById('result');
+
+            optionContainer.classList.remove('hidden');
+            optionTitle.textContent = selectedOption.replace(/([A-Z])/g, ' $1').trim();
+            result.textContent = '';
+
+            let contentHtml = '';
+
+            switch (selectedOption) {
+                case 'pi':
+                    contentHtml = `
+                        <label for="piDigits">Enter number of digits for Pi:</label>
+                        <input type="number" id="piDigits">
+                        <button type="button" onclick="calculatePi()">Calculate</button>
+                    `;
+                    break;
+                case 'e':
+                    contentHtml = `
+                        <label for="eDigits">Enter number of digits for e:</label>
+                        <input type="number" id="eDigits">
+                        <button type="button" onclick="calculateE()">Calculate</button>
+                    `;
+                    break;
+                case 'fibonacci':
+                    contentHtml = `
+                        <label for="fibonacciDigits">Enter number of Fibonacci Sequences:</label>
+                        <input type="number" id="fibonacciDigits">
+                        <button type="button" onclick="calculateFibonacci()">Calculate</button>
+                    `;
+                    break;
+                case 'factorisation':
+                    contentHtml = `
+                        <label for="factorisationNumber">Enter a number to factorise:</label>
+                        <input type="number" id="factorisationNumber">
+                        <button type="button" onclick="calculateFactorisation()">Calculate</button>
+                    `;
+                    break;
+                case 'prime':
+                    contentHtml = `
+                        <label for="primeNumber">Enter a number to check if it's prime:</label>
+                        <input type="number" id="primeNumber">
+                        <button type="button" onclick="checkPrime()">Check</button>
+                    `;
+                    break;
+                case 'tileCost':
+                    contentHtml = `
+                        <label for="tileCost">Enter cost of tile in $/tile:</label>
+                        <input type="number" id="tileCost">
+                        <label for="tileWidth">Enter the width of the floor:</label>
+                        <input type="number" id="tileWidth">
+                        <label for="tileHeight">Enter the height of the floor:</label>
+                        <input type="number" id="tileHeight">
+                        <button type="button" onclick="calculateTileCost()">Calculate</button>
+                    `;
+                    break;
+                case 'mortgage':
+                    contentHtml = `
+                        <label for="loanAmount">Loan amount:</label>
+                        <input type="number" id="loanAmount">
+                        <label for="annualInterestRate">Enter the annual interest rate (%):</label>
+                        <input type="number" id="annualInterestRate">
+                        <label for="loanTerm">Enter the loan term (years):</label>
+                        <input type="number" id="loanTerm">
+                        <button type="button" onclick="calculateMortgage()">Calculate</button>
+                    `;
+                    break;
+                case 'changeReturn':
+                    contentHtml = `
+                        <label for="itemCost">Cost of item:</label>
+                        <input type="number" id="itemCost">
+                        <label for="cashGiven">Enter cash amount:</label>
+                        <input type="number" id="cashGiven">
+                        <button type="button" onclick="calculateChangeReturn()">Calculate</button>
+                    `;
+                    break;
+                case 'binaryConverter':
+                    contentHtml = `
+                        <label for="conversionChoice">Enter '1' to convert binary to decimal or '2' to convert decimal to binary:</label>
+                        <input type="number" id="conversionChoice">
+                        <button type="button" onclick="convertBinary()">Convert</button>
+                    `;
+                    break;
+                case 'calculator':
+                    contentHtml = `
+                        <label for="calcOperation">Select operation:</label>
+                        <select id="calcOperation" onchange="toggleSecondNumber()">
+                            <option value="add">Add</option>
+                            <option value="subtract">Subtract</option>
+                            <option value="multiply">Multiply</option>
+                            <option value="divide">Divide</option>
+                            <option value="power">Power</option>
+                            <option value="sqrt">Square Root</option>
+                            <option value="sin">Sine</option>
+                            <option value="cos">Cosine</option>
+                            <option value="tan">Tangent</option>
+                        </select>
+                        <div id="calcInputs">
+                            <label for="num1">Enter first number:</label>
+                            <input type="number" id="num1">
+                            <label for="num2" class="hidden">Enter second number:</label>
+                            <input type="number" id="num2" class="hidden">
+                        </div>
+                        <button type="button" onclick="calculate()">Calculate</button>
+                    `;
+                    break;
+                default:
+                    contentHtml = 'This option is not yet implemented.';
+            }
+
+            optionContent.innerHTML = contentHtml;
+        }
+
+        function toggleSecondNumber() {
+            const operation = document.getElementById('calcOperation').value;
+            const num2Label = document.querySelector('#calcInputs label[for="num2"]');
+            const num2Input = document.getElementById('num2');
+            if (['sqrt', 'sin', 'cos', 'tan'].includes(operation)) {
+                num2Label.classList.add('hidden');
+                num2Input.classList.add('hidden');
+            } else {
+                num2Label.classList.remove('hidden');
+                num2Input.classList.remove('hidden');
+            }
+        }
+
+        function calculatePi() {
+            const digits = document.getElementById('piDigits').value;
+            const result = document.getElementById('result');
+            result.textContent = `Pi to ${digits} digits is: ${mp.pi}`;
+            document.getElementById('piDigits').value = '';
+        }
+
+        function calculateE() {
+            const digits = document.getElementById('eDigits').value;
+            const result = document.getElementById('result');
+            result.textContent = `e to ${digits} digits is: ${mp.e}`;
+            document.getElementById('eDigits').value = '';
+        }
+
+        function calculateFibonacci() {
+            const digits = document.getElementById('fibonacciDigits').value;
+            const result = document.getElementById('result');
+            result.textContent = `Fibonacci sequence to ${digits} digits is: ${fibonacci_numpy(digits)}`;
+            document.getElementById('fibonacciDigits').value = '';
+        }
+
+        function calculateFactorisation() {
+            const number = document.getElementById('factorisationNumber').value;
+            const result = document.getElementById('result');
+            result.textContent = `Factorisation of ${number} is: ${primefactorise(number)}`;
+            document.getElementById('factorisationNumber').value = '';
+        }
+
+        function checkPrime() {
+            const number = document.getElementById('primeNumber').value;
+            const result = document.getElementById('result');
+            result.textContent = `${number} is ${is_prime(number) ? 'a prime number' : 'not a prime number'}`;
+            document.getElementById('primeNumber').value = '';
+        }
+
+        function calculateTileCost() {
+            const cost = document.getElementById('tileCost').value;
+            const width = document.getElementById('tileWidth').value;
+            const height = document.getElementById('tileHeight').value;
+            const result = document.getElementById('result');
+            const totalCost = cost * width * height;
+            result.textContent = `Total cost to cover a ${width}x${height} floor is: $${totalCost}`;
+            document.getElementById('tileCost').value = '';
+            document.getElementById('tileWidth').value = '';
+            document.getElementById('tileHeight').value = '';
+        }
+
+        function calculateMortgage() {
+            const loanAmount = document.getElementById('loanAmount').value;
+            const annualInterestRate = document.getElementById('annualInterestRate').value;
+            const loanTerm = document.getElementById('loanTerm').value;
+            const result = document.getElementById('result');
+            const monthlyInterestRate = (annualInterestRate / 100) / 12;
+            const totalPayments = loanTerm * 12;
+            let monthlyPayment;
+            if (monthlyInterestRate > 0) {
+                monthlyPayment = loanAmount * (monthlyInterestRate * (1 + monthlyInterestRate)**totalPayments) / ((1 + monthlyInterestRate)**totalPayments - 1);
+            } else {
+                monthlyPayment = loanAmount / totalPayments;
+            }
+            result.textContent = `Monthly payment is: $${monthlyPayment.toFixed(2)}`;
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('annualInterestRate').value = '';
+            document.getElementById('loanTerm').value = '';
+        }
+
+        function calculateChangeReturn() {
+            const itemCost = document.getElementById('itemCost').value;
+            const cashGiven = document.getElementById('cashGiven').value;
+            const result = document.getElementById('result');
+            let change = cashGiven - itemCost;
+            const denominationBreakdown = {};
+            const denominationList = [100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.05];
+            for (const denom of denominationList) {
+                let count = 0;
+                while (change >= denom) {
+                    count += 1;
+                    change -= denom;
+                    change = Math.round(change * 100) / 100;
+                }
+                if (count > 0) {
+                    denominationBreakdown[denom] = count;
+                }
+            }
+            const breakdownStr = Object.entries(denominationBreakdown).map(([denom, count]) => `${count}x $${denom}`).join(', ');
+            result.textContent = `Change: ${cashGiven - itemCost}, Denomination: ${breakdownStr}`;
+            document.getElementById('itemCost').value = '';
+            document.getElementById('cashGiven').value = '';
+        }
+
+        function convertBinary() {
+            const choice = document.getElementById('conversionChoice').value;
+            const result = document.getElementById('result');
+            if (choice === '1') {
+                const binaryNumber = prompt("Enter a binary number:");
+                const decimalNumber = parseInt(binaryNumber, 2);
+                result.textContent = `The decimal representation of ${binaryNumber} is ${decimalNumber}`;
+            } else if (choice === '2') {
+                const decimalNumber = prompt("Enter a decimal number:");
+                const binaryNumber = Number(decimalNumber).toString(2);
+                result.textContent = `The binary representation of ${decimalNumber} is ${binaryNumber}`;
+            } else {
+                result.textContent = 'Invalid choice';
+            }
+            document.getElementById('conversionChoice').value = '';
+        }
+
+        function calculate() {
+            const operation = document.getElementById('calcOperation').value;
+            const num1 = parseFloat(document.getElementById('num1').value);
+            const num2 = parseFloat(document.getElementById('num2').value);
+            const result = document.getElementById('result');
+            let calcResult;
+            switch (operation) {
+                case 'add':
+                    calcResult = num1 + num2;
+                    break;
+                case 'subtract':
+                    calcResult = num1 - num2;
+                    break;
+                case 'multiply':
+                    calcResult = num1 * num2;
+                    break;
+                case 'divide':
+                    calcResult = num1 / num2;
+                    break;
+                case 'power':
+                    calcResult = Math.pow(num1, num2);
+                    break;
+                case 'sqrt':
+                    calcResult = Math.sqrt(num1);
+                    break;
+                case 'sin':
+                    calcResult = Math.sin(num1 * Math.PI / 180);
+                    break;
+                case 'cos':
+                    calcResult = Math.cos(num1 * Math.PI / 180);
+                    break;
+                case 'tan':
+                    calcResult = Math.tan(num1 * Math.PI / 180);
+                    break;
+                default:
+                    calcResult = 'Invalid operation';
+            }
+            result.textContent = `Result: ${calcResult}`;
+            document.getElementById('num1').value = '';
+            document.getElementById('num2').value = '';
+        }
+    </script>
+</body>
+</html>
